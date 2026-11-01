@@ -819,32 +819,14 @@ body.dark .nav-item.active {
 }
 
 /* Priority stripe on left */
-.task-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 8px; bottom: 8px;
-  width: 5px;
-  border-radius: 0 4px 4px 0;
-  background: var(--border);
-  transition: all var(--transition);
-}
-
-.task-card[data-priority="lowest"]::before   { background: #94a3b8; }
-.task-card[data-priority="low"]::before      { background: var(--clr-low); }
-.task-card[data-priority="medium"]::before   { background: var(--clr-medium); }
-.task-card[data-priority="high"]::before     { background: var(--clr-high); }
-.task-card[data-priority="highest"]::before  { background: var(--clr-critical); }
-.task-card[data-priority="critical"]::before { background: var(--clr-critical); }
+.task-card::before { display: none; }
 
 /* Subtask card indicator */
 .task-card.is-subtask {
   border-left: none;
   background: linear-gradient(135deg, rgba(99,102,241,.04) 0%, var(--surface) 60%);
 }
-.task-card.is-subtask::before {
-  display: block;
-  background: var(--clr-primary);
-}
+.task-card.is-subtask::before { display: none; }
 
 .card-subtask-of {
   display: inline-flex; align-items: center; gap: 5px;
