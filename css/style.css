@@ -2893,9 +2893,9 @@ kbd {
 
   /* ---- Topbar: compact — only title + search + dark mode ---- */
   #topbar {
-    height: 50px;
+    height: auto;
     min-height: 50px;
-    padding: 0 12px;
+    padding: calc(env(safe-area-inset-top) + 8px) 12px 8px;
     gap: 8px;
     flex-shrink: 0;
   }
