@@ -2889,7 +2889,7 @@ kbd {
     height: 100%;
   }
 
-  .kanban-col {
+  .kanban-column {
     min-width: 280px;
     max-width: 280px;
     flex-shrink: 0;
@@ -2899,7 +2899,7 @@ kbd {
     flex-direction: column;
   }
 
-  .col-cards {
+  .col-body {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -3059,7 +3059,8 @@ kbd {
   #confirm-dialog { width: 88vw; }
 
   /* ---- Overlays ---- */
-  #overlay { display: none !important; }
+  /* don't hide overlay — needed to close detail panel on tap */
+  #overlay { display: block; }
 
   /* ---- Scrollbar: hide on mobile ---- */
   ::-webkit-scrollbar { display: none; }
