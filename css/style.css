@@ -670,7 +670,7 @@ body.dark .nav-item.active {
   position: relative;
 }
 
-.view { display: none; height: 100%; }
+.view { display: none; height: 100%; min-height: 0; }
 .view.active { display: flex; flex-direction: column; }
 
 #team-view { overflow-y: auto; }
@@ -2888,141 +2888,171 @@ kbd {
     height: 100dvh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
-  /* ---- Topbar: slim, no filters ---- */
+  /* ---- Topbar: compact — only title + search + dark mode ---- */
   #topbar {
-    height: 52px;
-    padding: 0 14px;
+    height: 50px;
+    min-height: 50px;
+    padding: 0 12px;
     gap: 8px;
     flex-shrink: 0;
   }
-  .topbar-title { font-size: 16px; font-weight: 700; }
+  .topbar-title { font-size: 17px; font-weight: 700; flex-shrink: 0; }
   .topbar-sep { display: none; }
   .filter-row { display: none; }
   .view-toggle { display: none; }
   .topbar-avatars { display: none; }
   #new-task-btn { display: none; }
-  #dark-toggle { width: 34px; height: 34px; font-size: 17px; }
-
-  /* Search: full width when tapped (via JS class) */
+  #dark-toggle {
+    width: 36px; height: 36px;
+    font-size: 18px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur-sm);
+    -webkit-backdrop-filter: var(--glass-blur-sm);
+    border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+  }
   .search-wrap {
     flex: 1;
+    min-width: 0;
     max-width: 100%;
   }
   .search-shortcut { display: none; }
 
-  /* ---- Content ---- */
+  /* ---- Content: fills remaining space above bottom nav ---- */
   #content {
     flex: 1;
+    min-height: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding-bottom: 0;
   }
 
-  /* ---- Board: horizontal scroll columns ---- */
+  /* ---- Views fill content ---- */
+  .view.active {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ---- Board: full-height horizontal scroll ---- */
   #board-view {
     display: flex !important;
     flex-direction: row;
-    gap: 12px;
+    gap: 10px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 12px;
-    align-items: flex-start;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    align-items: stretch;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     height: 100%;
+    box-sizing: border-box;
   }
 
+  /* Each column = ~85% of screen width so user sees next one */
   .kanban-column {
-    min-width: 280px;
-    max-width: 280px;
+    min-width: calc(100vw - 56px);
+    max-width: calc(100vw - 56px);
     flex-shrink: 0;
     scroll-snap-align: start;
-    height: 100%;
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
 
   .col-body {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
   }
 
-  /* ---- Cards: slightly larger touch targets ---- */
+  /* ---- Cards ---- */
   .task-card {
     padding: 12px 14px;
     margin-bottom: 8px;
+    border-radius: var(--r-xl);
   }
-
-  .card-title { font-size: 14px; }
+  .card-title { font-size: 14px; line-height: 1.4; }
 
   /* ---- List view ---- */
   #list-view {
     padding: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    height: 100%;
   }
-
   .list-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
   .list-table th:nth-child(n+5),
   .list-table td:nth-child(n+5) { display: none; }
 
-  /* ---- Detail panel: full screen ---- */
+  /* ---- Dashboard / Team ---- */
+  #dashboard-view, #team-view {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ---- Detail panel: slides in from right, full screen ---- */
   #detail-panel {
-    width: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
     min-width: unset !important;
     max-width: unset !important;
-    height: 100dvh;
-    top: 0;
-    right: 0;
-    border-radius: 0;
-    transform: translateX(100%);
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    transform: translateX(100%) !important;
+    transition: transform .35s cubic-bezier(.25,.46,.45,.94) !important;
+    opacity: 1 !important;
   }
-  #detail-panel.open { transform: translateX(0); }
-
-  .panel-two-col {
-    grid-template-columns: 1fr !important;
+  #detail-panel.open {
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
   }
 
+  .panel-two-col { grid-template-columns: 1fr !important; }
   .panel-sidebar {
     border-left: none !important;
     border-top: 1px solid var(--border);
   }
 
-  /* ---- Task modal: full screen ---- */
-  #modal-overlay { align-items: flex-end; }
-
+  /* ---- Task modal: sheet from bottom ---- */
+  #modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
   #task-modal {
     width: 100%;
     max-width: 100%;
-    max-height: 92dvh;
-    border-radius: 20px 20px 0 0;
+    max-height: 94dvh;
+    border-radius: 24px 24px 0 0 !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    transform: translateY(100%) !important;
+    transition: transform var(--spring) !important;
   }
-
-  .modal-two-col {
-    grid-template-columns: 1fr !important;
+  #modal-overlay.visible #task-modal {
+    transform: translateY(0) !important;
   }
-
+  .modal-two-col { grid-template-columns: 1fr !important; }
   .modal-right {
     border-left: none !important;
     border-top: 1px solid var(--border);
     padding-top: 12px;
   }
 
-  /* ---- Team view ---- */
-  .team-cards-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* ---- Dashboard ---- */
-  .dash-stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
+  /* ---- Team / Dashboard grids ---- */
+  .team-cards-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .dash-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
 
   /* ---- Bottom navigation — Liquid Glass ---- */
   #mobile-bottom-nav {
@@ -3030,14 +3060,14 @@ kbd {
     position: fixed;
     bottom: 0;
     left: 0; right: 0;
-    height: 60px;
     background: var(--glass-bg-heavy);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    z-index: 200;
+    z-index: 300;
     padding-bottom: env(safe-area-inset-bottom);
-    box-shadow: 0 -8px 32px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.5) inset;
+    height: calc(56px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 32px rgba(0,0,0,.08);
   }
 
   .mob-nav-btn {
@@ -3046,77 +3076,47 @@ kbd {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 3px;
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 10px;
     font-weight: 500;
     padding: 6px 0;
     cursor: pointer;
-    transition: color .15s;
+    transition: color .15s, transform .12s;
     -webkit-tap-highlight-color: transparent;
   }
+  .mob-nav-btn:active { transform: scale(.88); }
+  .mob-nav-btn.active { color: var(--clr-primary); }
+  .mob-nav-icon { font-size: 22px; line-height: 1; }
+  .mob-nav-label { font-size: 10px; font-weight: 600; letter-spacing: .01em; }
 
-  .mob-nav-btn.active {
-    color: var(--clr-primary);
-  }
-
-  .mob-nav-icon { font-size: 20px; line-height: 1; }
-  .mob-nav-label { font-size: 10px; }
-
-  /* new task button in bottom nav — highlighted */
+  /* New task — filled circle */
   #mob-new-task-btn .mob-nav-icon {
-    width: 36px; height: 36px;
-    background: var(--clr-primary);
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-accent));
     color: #fff;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    box-shadow: 0 4px 12px rgba(99,102,241,.4);
+    font-size: 24px;
+    box-shadow: 0 4px 16px rgba(99,102,241,.45);
+    margin-bottom: 1px;
   }
   #mob-new-task-btn { color: var(--clr-primary); }
 
-  /* ---- Content padding for bottom nav ---- */
-  #content { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
-
-  /* ---- Bulk bar ---- */
-  .bulk-bar {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  /* ---- Shortcuts dialog ---- */
-  #shortcuts-dialog {
-    min-width: unset;
-    width: 92vw;
-    padding: 20px;
-  }
+  /* ---- Misc ---- */
+  .bulk-bar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; font-size: 12px; }
+  #shortcuts-dialog { min-width: unset; width: 92vw; padding: 20px; }
   .shortcuts-grid { grid-template-columns: 1fr 1fr !important; }
-
-  /* ---- Member modal ---- */
-  #member-modal {
-    width: 92vw;
-    max-width: unset;
-  }
-
-  /* ---- Confirm dialog ---- */
+  #member-modal { width: 92vw; max-width: unset; }
   #confirm-dialog { width: 88vw; }
-
-  /* ---- Overlays ---- */
-  /* don't hide overlay — needed to close detail panel on tap */
-  #overlay { display: block; }
-
-  /* ---- Scrollbar: hide on mobile ---- */
   ::-webkit-scrollbar { display: none; }
 }
 
-/* Safe area for iPhone notch / home indicator */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-  #mobile-bottom-nav {
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(60px + env(safe-area-inset-bottom));
+  @media (max-width: 768px) {
+    #mobile-bottom-nav {
+      height: calc(56px + env(safe-area-inset-bottom));
+    }
   }
 }
