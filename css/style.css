@@ -828,9 +828,11 @@ body.dark .nav-item.active {
   transition: all var(--transition);
 }
 
+.task-card[data-priority="lowest"]::before   { background: #94a3b8; }
 .task-card[data-priority="low"]::before      { background: var(--clr-low); }
 .task-card[data-priority="medium"]::before   { background: var(--clr-medium); }
 .task-card[data-priority="high"]::before     { background: var(--clr-high); }
+.task-card[data-priority="highest"]::before  { background: var(--clr-critical); }
 .task-card[data-priority="critical"]::before { background: var(--clr-critical); }
 
 /* Subtask card indicator */
