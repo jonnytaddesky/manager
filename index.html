@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#6366f1" />
+  <title>LoyaltyAI — Project Management</title>
+  <meta name="description" content="A beautiful Kanban task manager with sprint tracking, dashboard analytics, and team collaboration." />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ========== SIDEBAR ========== -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">LoyaltyAI</span>
+      <span class="logo-version">v1.0</span>
+      <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar">‹</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Views</div>
+      <div class="nav-item" data-view="board" role="button" tabindex="0" aria-label="Kanban board">
+        <span class="nav-icon">🗂</span>
+        <span class="nav-label">Kanban</span>
+        <span class="nav-badge" id="sprint-count-badge">0</span>
+      </div>
+      <div class="nav-item" data-view="team" role="button" tabindex="0" aria-label="Team">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Team</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Filters</div>
+      <div class="nav-item" id="filter-no-assignee" role="button" tabindex="0">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Unassigned</span>
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- ========== MAIN ========== -->
+  <main id="main">
+
+    <!-- Top bar -->
+    <header id="topbar">
+      <button class="sidebar-expand-btn hidden" id="sidebar-expand-btn" title="Expand sidebar">☰</button>
+      <div class="topbar-title" id="topbar-title">Board</div>
+      <div class="topbar-sep"></div>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search tasks…"
+          autocomplete="off"
+          aria-label="Search tasks"
+        />
+        <span class="search-shortcut">/</span>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row" id="filter-row">
+        <!-- Priority filter -->
+        <div class="filter-dropdown" id="priority-filter-wrap">
+          <button class="filter-chip" id="priority-filter-btn" aria-haspopup="true">
+            <span>Priority</span>
+            <span>▾</span>
+          </button>
+          <div class="filter-dropdown-menu" id="priority-filter-menu">
+            <div class="item" data-filter="priority" data-value="">All priorities</div>
+            <div class="item" data-filter="priority" data-value="highest">⬆⬆ Highest</div>
+            <div class="item" data-filter="priority" data-value="high">⬆ High</div>
+            <div class="item" data-filter="priority" data-value="medium">▬ Medium</div>
+            <div class="item" data-filter="priority" data-value="low">⬇ Low</div>
+            <div class="item" data-filter="priority" data-value="lowest">⬇⬇ Lowest</div>
+          </div>
+        </div>
+
+        <!-- Assignee filter -->
+        <div class="filter-dropdown" id="assignee-filter-wrap">
+          <button class="filter-chip" id="assignee-filter-btn" aria-haspopup="true">
+            <span>Assignee</span>
+            <span>▾</span>
+          </button>
+          <div class="filter-dropdown-menu" id="assignee-filter-menu">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Label filter -->
+        <div class="filter-dropdown" id="label-filter-wrap">
+          <button class="filter-chip" id="label-filter-btn" aria-haspopup="true">
+            <span>Label</span>
+            <span>▾</span>
+          </button>
+          <div class="filter-dropdown-menu" id="label-filter-menu">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Clear filters (hidden when no filters active) -->
+        <button class="filter-chip hidden" id="clear-filters-btn">
+          ✕ Clear filters
+        </button>
+      </div>
+
+      <!-- Actions -->
+      <div class="topbar-actions">
+        <!-- User avatar filter -->
+        <div class="topbar-avatars" id="topbar-avatars"></div>
+
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="board" title="Board (B)">⬛</button>
+          <button class="view-btn" data-view="list" title="List (L)">☰</button>
+          <button class="view-btn" data-view="dashboard" title="Dashboard (D)">📊</button>
+        </div>
+
+        <!-- Dark mode -->
+        <button id="dark-toggle" title="Toggle dark mode" aria-label="Toggle dark/light mode">☀️</button>
+
+        <!-- New task -->
+        <button class="btn btn-primary" id="new-task-btn" title="New task (N)" aria-label="Create new task">
+          <span>＋</span> New Task
+        </button>
+      </div>
+    </header>
+
+    <!-- ========== CONTENT AREA ========== -->
+    <div id="content">
+
+      <div class="bulk-bar hidden" id="bulk-bar">
+        <span class="bulk-count" id="bulk-count">0 selected</span>
+        <select class="bulk-status-sel" id="bulk-status-sel">
+          <option value="">Change status…</option>
+          <option value="todo">Todo</option>
+          <option value="analysis">Analysis</option>
+          <option value="inprogress">In Progress</option>
+          <option value="review">Review</option>
+          <option value="testing">In Testing</option>
+          <option value="done">Done</option>
+        </select>
+        <select class="bulk-assignee-sel" id="bulk-assignee-sel">
+          <option value="">Reassign…</option>
+        </select>
+        <button class="btn btn-danger btn-sm" id="bulk-delete-btn">🗑 Delete selected</button>
+        <button class="btn btn-secondary btn-sm" id="bulk-clear-btn">✕ Clear</button>
+      </div>
+
+      <!-- === BOARD VIEW === -->
+      <div class="view active" id="board-view">
+        <!-- Columns rendered by JS -->
+      </div>
+
+      <!-- === LIST VIEW === -->
+      <div class="view" id="list-view">
+        <div class="list-table-wrap">
+          <table class="list-table" id="list-table">
+            <thead>
+              <tr>
+                <th data-sort="id">ID</th>
+                <th data-sort="title">Title</th>
+                <th data-sort="status">Status</th>
+                <th data-sort="priority">Priority</th>
+                <th data-sort="assignee">Assignee</th>
+                <th data-sort="dueDate">Due Date</th>
+                <th data-sort="points">Points</th>
+                <th>Sprint</th>
+              </tr>
+            </thead>
+            <tbody id="list-body">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- === DASHBOARD VIEW === -->
+      <div class="view" id="dashboard-view">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- === SPRINT VIEW === -->
+      <div class="view" id="sprint-view">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- === TEAM VIEW === -->
+      <div class="view" id="team-view">
+        <!-- Populated by JS -->
+      </div>
+
+    </div><!-- /#content -->
+
+  </main><!-- /#main -->
+
+  <!-- ========== OVERLAY (for detail panel) ========== -->
+  <div id="overlay" role="presentation" aria-hidden="true"></div>
+
+  <!-- ========== DETAIL PANEL ========== -->
+  <aside id="detail-panel" role="complementary" aria-label="Task details" aria-hidden="true">
+    <div class="panel-header">
+      <span class="panel-id" id="panel-id"></span>
+      <h2 id="panel-title"></h2>
+      <button class="panel-expand-btn" id="panel-expand" aria-label="Expand to fullscreen" title="Expand (F)">⛶</button>
+      <button class="panel-close" id="panel-close" aria-label="Close detail panel">✕</button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <!-- Populated by JS -->
+    </div>
+    <div class="panel-footer" id="panel-footer">
+      <!-- Populated by JS -->
+    </div>
+  </aside>
+
+  <!-- ========== TASK MODAL ========== -->
+  <div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Task form" aria-hidden="true">
+    <div id="task-modal">
+      <!-- Top bar -->
+      <div class="modal-topbar">
+        <span class="modal-topbar-id" id="modal-topbar-id"></span>
+        <div class="modal-topbar-actions">
+          <div class="template-wrap">
+            <button class="modal-topbar-btn" id="template-pick-btn" type="button" title="Templates">📋</button>
+            <div class="template-dropdown hidden" id="template-dropdown"></div>
+          </div>
+          <button class="modal-topbar-btn btn-danger-ghost hidden" id="modal-delete" title="Delete task">🗑</button>
+          <button class="modal-topbar-btn" id="modal-close" aria-label="Close modal">✕</button>
+        </div>
+      </div>
+
+      <input type="hidden" id="edit-task-id" />
+
+      <div class="modal-two-col">
+        <!-- LEFT: title + description -->
+        <div class="modal-left">
+          <input type="text" id="field-title" class="modal-title-input" placeholder="Task title…" maxlength="120" />
+          <textarea id="field-desc" class="modal-desc-input" placeholder="Add description…"></textarea>
+
+          <!-- Sprint toggle lives here -->
+          <label class="sprint-check-row">
+            <input type="checkbox" id="field-sprint" />
+            <span>Add to current sprint</span>
+          </label>
+
+          <!-- Footer actions -->
+          <div class="modal-left-footer">
+            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+            <button class="btn btn-primary" id="modal-save">Create Task</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: all meta fields -->
+        <div class="modal-right">
+          <div class="modal-meta-field">
+            <span class="modal-meta-label">Status</span>
+            <select id="field-status" class="modal-meta-select">
+              <option value="todo">Todo</option>
+              <option value="analysis">Analysis</option>
+              <option value="inprogress">In Progress</option>
+              <option value="review">Review</option>
+              <option value="testing">In Testing</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <div class="modal-meta-field">
+            <span class="modal-meta-label">Priority</span>
+            <select id="field-priority" class="modal-meta-select">
+              <option value="highest">⬆⬆ Highest</option>
+              <option value="high">⬆ High</option>
+              <option value="medium" selected>▬ Medium</option>
+              <option value="low">⬇ Low</option>
+              <option value="lowest">⬇⬇ Lowest</option>
+            </select>
+          </div>
+          <div class="modal-meta-field">
+            <span class="modal-meta-label">Assignee</span>
+            <select id="field-assignee" class="modal-meta-select">
+              <option value="">— Unassigned —</option>
+            </select>
+          </div>
+          <div class="modal-meta-field">
+            <span class="modal-meta-label">Due Date</span>
+            <input type="date" id="field-due" class="modal-meta-input" />
+          </div>
+          <div class="modal-meta-field">
+            <span class="modal-meta-label">Story Points</span>
+            <input type="number" id="field-points" class="modal-meta-input" min="1" max="100" placeholder="—" />
+          </div>
+          <div class="modal-meta-field">
+            <span class="modal-meta-label">Labels</span>
+            <div class="labels-input-wrap" id="labels-wrap">
+              <input class="labels-input" id="labels-input" placeholder="Type & press Enter…" autocomplete="off" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /#task-modal -->
+  </div><!-- /#modal-overlay -->
+
+  <!-- ========== CONFIRM DIALOG ========== -->
+  <div id="confirm-overlay" role="dialog" aria-modal="true" aria-label="Confirm action" aria-hidden="true">
+    <div id="confirm-dialog">
+      <div class="confirm-icon">⚠️</div>
+      <p id="confirm-message"></p>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MEMBER MODAL ========== -->
+  <div id="member-modal-overlay" role="dialog" aria-modal="true" aria-label="Team member form" aria-hidden="true">
+    <div id="member-modal">
+      <div class="modal-header">
+        <h3 id="member-modal-title">Add Member</h3>
+        <button class="modal-close" id="member-modal-close" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="member-name-input">Full Name <span style="color:var(--clr-high)">*</span></label>
+          <input type="text" id="member-name-input" placeholder="e.g. John Doe" maxlength="40" />
+        </div>
+        <div class="form-group">
+          <label>Avatar</label>
+          <div class="photo-upload-row">
+            <div class="photo-preview-wrap" id="photo-preview-wrap">
+              <span id="photo-preview-emoji">😀</span>
+              <img id="photo-preview-img" class="hidden" alt="preview" />
+            </div>
+            <div class="photo-upload-actions">
+              <label class="btn btn-secondary btn-sm photo-upload-label" for="photo-file-input">📷 Upload photo</label>
+              <input type="file" id="photo-file-input" accept="image/*" style="display:none" />
+              <button class="btn btn-secondary btn-sm hidden" id="photo-remove-btn" type="button">✕ Remove</button>
+            </div>
+          </div>
+          <div class="avatar-picker" id="avatar-picker"></div>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-picker" id="color-picker"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="member-modal-cancel">Cancel</button>
+        <button class="btn btn-danger hidden" id="member-modal-delete">Remove</button>
+        <button class="btn btn-primary" id="member-modal-save">Add Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <!-- ========== KEYBOARD SHORTCUTS OVERLAY ========== -->
+  <div id="shortcuts-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="shortcuts-dialog">
+      <div class="shortcuts-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="modal-close" id="shortcuts-close">✕</button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Navigation</div>
+          <div class="shortcut-row"><kbd>B</kbd><span>Kanban board</span></div>
+          <div class="shortcut-row"><kbd>L</kbd><span>List view</span></div>
+          <div class="shortcut-row"><kbd>D</kbd><span>Dashboard</span></div>
+          <div class="shortcut-row"><kbd>T</kbd><span>Team</span></div>
+        </div>
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Actions</div>
+          <div class="shortcut-row"><kbd>N</kbd><span>New task</span></div>
+          <div class="shortcut-row"><kbd>/</kbd><span>Search</span></div>
+          <div class="shortcut-row"><kbd>F</kbd><span>Fullscreen task</span></div>
+          <div class="shortcut-row"><kbd>Esc</kbd><span>Close panel/modal</span></div>
+        </div>
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Other</div>
+          <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>Undo delete</span></div>
+          <div class="shortcut-row"><kbd>?</kbd><span>This panel</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MOBILE BOTTOM NAV ========== -->
+  <nav id="mobile-bottom-nav">
+    <button class="mob-nav-btn active" data-view="board">
+      <span class="mob-nav-icon">🗂</span>
+      <span class="mob-nav-label">Board</span>
+    </button>
+    <button class="mob-nav-btn" data-view="list">
+      <span class="mob-nav-icon">☰</span>
+      <span class="mob-nav-label">List</span>
+    </button>
+    <button class="mob-nav-btn" data-view="dashboard">
+      <span class="mob-nav-icon">📊</span>
+      <span class="mob-nav-label">Stats</span>
+    </button>
+    <button class="mob-nav-btn" data-view="team">
+      <span class="mob-nav-icon">👥</span>
+      <span class="mob-nav-label">Team</span>
+    </button>
+    <button class="mob-nav-btn" id="mob-new-task-btn">
+      <span class="mob-nav-icon">＋</span>
+      <span class="mob-nav-label">New</span>
+    </button>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
